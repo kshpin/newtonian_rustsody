@@ -1,0 +1,15 @@
+[package]
+name = "newtonian_rustsody"
+version = "0.1.0"
+authors = ["kshpin <kirill.shpin@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+sdl2 = "*"
+rand = "0.5.5"
+num = "0.3.1"
+
+#[profile.release]
+#debug = true
