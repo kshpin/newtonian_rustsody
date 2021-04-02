@@ -1,6 +1,5 @@
 /target
 oprofile_data
 .vscode
-.gitignore
 Cargo.lock
 newtonian_rustsody.iml
