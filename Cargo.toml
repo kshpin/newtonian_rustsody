@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 sdl2 = "*"
+image = "*"
 rand = "0.5.5"
 num = "0.3.1"
 

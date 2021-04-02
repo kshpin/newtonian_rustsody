@@ -1,8 +1,9 @@
 extern crate sdl2;
+extern crate image;
 
 mod fractals;
 
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime};
 
 use fractals::Fractal;
 use fractals::Rect;
@@ -84,6 +85,19 @@ fn main() {
                 },
                 Event::KeyDown { keycode: Some(Keycode::R), .. } => {
                     zoom_view = Rect { left: 0f64, top: 0f64, right: width as f64, bottom: height as f64 };
+                },
+                Event::KeyDown { keycode: Some(Keycode::S), .. } => {
+                    let timestamp = match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
+                        Ok(ts) => ts.as_nanos(),
+                        _ => 0
+                    };
+
+                    image::save_buffer(
+                        format!("out/out_{}.png", timestamp),
+                        &pixels,
+                        800, 800,
+                        image::ColorType::Rgb8
+                    ).expect("saved image");
                 },
                 Event::MouseWheel { y, .. } => {
                     let s = y as f64;
@@ -171,17 +185,6 @@ fn main() {
                     ((height*height) as f64/(zoom_view.bottom-zoom_view.top)) as u32
                 )
             ).expect("copy");
-
-            /*canvas.copy(
-                &texture,
-                DrawRect::new(
-                    zoom_view.left as i32,
-                    zoom_view.top as i32,
-                    (zoom_view.right-zoom_view.left) as u32,
-                    (zoom_view.bottom-zoom_view.top) as u32
-                ),
-                None
-            ).expect("copy");*/
 
             if selecting {
                 canvas.set_draw_color(white_color);
