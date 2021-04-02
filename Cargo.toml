@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 sdl2 = "*"
 image = "*"
+rusttype = "*"
 rand = "0.5.5"
 num = "0.3.1"
 
