@@ -1,18 +1,20 @@
 extern crate sdl2;
 extern crate image;
 
-mod fractals;
-
 use std::time::{Duration, Instant, SystemTime};
-
-use fractals::Fractal;
-use fractals::Rect;
 
 use sdl2::rect::Rect as DrawRect;
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::mouse::{MouseButton, MouseState};
+
+mod fractals;
+use fractals::Fractal;
+use fractals::Rect;
+
+mod text_display;
+
 
 #[allow(unused_imports)]
 use num::Complex;
@@ -48,7 +50,7 @@ fn main() {
     // endregion window setup
 
     let mut pixels = [0u8; 800*800*3];
-    let mut fractal = Fractal::with_coefficients(
+    /*let mut fractal = Fractal::with_coefficients(
         (width as usize, height as usize),
         Rect { left: -5f64, top: -5f64, right: 5f64, bottom: 5f64 },
         vec![
@@ -58,6 +60,11 @@ fn main() {
             Complex::new(9.197246762941262, 8.190568781916397),
             Complex::new(5.366325985514713, -1.1587722090698378),
         ]
+    );*/
+    let mut fractal = Fractal::with_random_coefficients(
+        (width as usize, height as usize),
+        Rect { left: -5f64, top: -5f64, right: 5f64, bottom: 5f64 },
+        4
     );
 
     let mut draw;
