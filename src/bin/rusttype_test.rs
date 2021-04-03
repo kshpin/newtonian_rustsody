@@ -14,7 +14,7 @@ fn main() {
         })
     } else {
         eprintln!("No font specified ... using Roboto-Regular.ttf");
-        let font_data = include_bytes!("../../res/Roboto-Regular.ttf");
+        let font_data = include_bytes!("../../res/fonts/Roboto-Regular.ttf");
         Font::try_from_bytes(font_data as &[u8]).expect("error constructing a Font from bytes")
     };
 

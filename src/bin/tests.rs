@@ -17,6 +17,10 @@ impl Rectangle {
     }
 }
 
+fn main() {
+
+}
+
 fn _add_one(x: Option<i32>) -> Option<i32> {
     match x {
         None => None,
@@ -51,7 +55,7 @@ pub fn _fibonacci(n: i32) -> i32 {
 
 fn _play_guessing_game() {
     println!("guess the number\n");
-    let target = rand::thread_rng().gen_range(1, 101);
+    let target = 0;//rand::thread_rng().gen_range(1, 101);
 
     let mut first = true;
     let mut guess = 0;
