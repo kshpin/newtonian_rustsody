@@ -7,10 +7,10 @@ fn main() {
         let font_path = std::env::current_dir().unwrap().join(font_path);
         let data = std::fs::read(&font_path).unwrap();
         Font::try_from_vec(data).unwrap_or_else(|| {
-            panic!(format!(
+            panic!(
                 "error constructing a Font from data at {:?}",
                 font_path
-            ));
+            );
         })
     } else {
         eprintln!("No font specified ... using Roboto-Regular.ttf");
