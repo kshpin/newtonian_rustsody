@@ -4,8 +4,11 @@ use num::pow;
 
 use std::time::Instant;
 
+use ggez::{Context, GameResult};
+use ggez::graphics::{self, Drawable, DrawParam, Image, Rect, BlendMode};
+
 #[derive(Debug)]
-pub struct Rect<T> {
+pub struct Rectangle<T> {
     pub left: T,
     pub top: T,
     pub right: T,
@@ -14,11 +17,13 @@ pub struct Rect<T> {
 
 pub struct Fractal {
     size: (usize, usize),
-    view: Rect<f64>,
+    view: Rectangle<f64>,
 
     coefficients: Vec<Complex<f64>>,
 
     roots: Vec<Complex<f64>>,
+
+    pixels: [u8; 800*800*3], // TODO: move away from hardcoding
 }
 
 impl Fractal {
@@ -27,7 +32,7 @@ impl Fractal {
     const MAX_ITERS: u32 = 100;
 
     #[allow(dead_code)]
-    pub fn with_random_coefficients(size: (usize, usize), view: Rect<f64>, degree: u32) -> Fractal {
+    pub fn with_random_coefficients(ctx: &mut Context, size: (usize, usize), view: Rectangle<f64>, degree: u32) -> Fractal {
         let mut coefficients = Vec::with_capacity((degree+1) as usize);
 
         let mut rng = rand::thread_rng();
@@ -38,30 +43,51 @@ impl Fractal {
 
         println!("{:#?}", coefficients);
 
-        Fractal { size, view, coefficients, roots: Vec::new() }
+        Fractal {
+            size,
+            view,
+            coefficients,
+            roots: Vec::new(),
+            pixels: [0u8; 800*800*3] // TODO: move away from hardcoding
+        }
     }
 
     #[allow(dead_code)]
-    pub fn with_coefficients(size: (usize, usize), view: Rect<f64>, coefficients: Vec<Complex<f64>>) -> Fractal {
-        Fractal { size, view, coefficients, roots: Vec::new() }
+    pub fn with_coefficients(ctx: &mut Context, size: (usize, usize), view: Rectangle<f64>, coefficients: Vec<Complex<f64>>) -> Fractal {
+        Fractal {
+            size,
+            view,
+            coefficients,
+            roots: Vec::new(),
+            pixels: [0u8; 800*800*3] // TODO: move away from hardcoding
+        }
     }
 
     #[allow(dead_code)]
-    pub fn set_view(&mut self, view: Rect<f64>) {
+    pub fn set_view(&mut self, view: Rectangle<f64>) {
         self.view = view;
     }
 
     #[allow(dead_code)]
-    pub fn scale_view(&mut self, scale: Rect<f64>) {
+    pub fn scale_view(&mut self, scale: Rectangle<f64>) {
         let width = self.view.right - self.view.left;
         let height = self.view.bottom - self.view.top;
 
-        self.view = Rect {
+        self.view = Rectangle {
             left: self.view.left + scale.left*width,
             top: self.view.top + scale.top*height,
             right: self.view.left + scale.right*width,
             bottom: self.view.top + scale.bottom*height,
         };
+    }
+
+    pub fn save_to_file(&self, filename: &str) {
+        image::save_buffer(
+            format!("out/{}", filename),
+            &self.pixels,
+            800, 800,
+            image::ColorType::Rgb8
+        ).expect("saved image");
     }
 
     fn source(&self, z: Complex<f64>) -> Complex<f64> {
@@ -94,7 +120,7 @@ impl Fractal {
         None
     }
 
-    pub fn generate(&mut self, pixels: &mut [u8]) {
+    pub fn generate(&mut self) {
         let x_scale = (self.view.right-self.view.left) / (self.size.0 as f64);
         let y_scale = (self.view.bottom-self.view.top) / (self.size.1 as f64);
 
@@ -156,18 +182,18 @@ impl Fractal {
         for c in &candidates {
             match c {
                 None => {
-                    pixels[pixel_index    ] = 0;
-                    pixels[pixel_index + 1] = 0;
-                    pixels[pixel_index + 2] = 0;
+                    self.pixels[pixel_index    ] = 0;
+                    self.pixels[pixel_index + 1] = 0;
+                    self.pixels[pixel_index + 2] = 0;
                 },
                 Some((root_index, iters)) => {
                     let dist = (-4f64 * (*iters as f64) / (Self::MAX_ITERS as f64)).exp();
 
                     let color = colors[*root_index];
 
-                    pixels[pixel_index    ] = (dist*(color.0 as f64)) as u8;
-                    pixels[pixel_index + 1] = (dist*(color.1 as f64)) as u8;
-                    pixels[pixel_index + 2] = (dist*(color.2 as f64)) as u8;
+                    self.pixels[pixel_index    ] = (dist*(color.0 as f64)) as u8;
+                    self.pixels[pixel_index + 1] = (dist*(color.1 as f64)) as u8;
+                    self.pixels[pixel_index + 2] = (dist*(color.2 as f64)) as u8;
                 }
             }
 
@@ -178,8 +204,27 @@ impl Fractal {
     }
 }
 
+impl Drawable for Fractal {
+    fn draw(&self, ctx: &mut Context, param: DrawParam) -> GameResult {
+        let image = Image::from_rgba8(ctx, self.size.0 as u16, self.size.1 as u16, &self.pixels).expect("fractal image");
+        graphics::draw(ctx, &image, param)
+    }
+
+    fn dimensions(&self, ctx: &mut Context) -> Option<Rect> {
+        Some(Rect::new(0f32, 0f32, self.size.0 as f32, self.size.1 as f32))
+    }
+
+    fn set_blend_mode(&mut self, mode: Option<BlendMode>) {
+        // TODO: figure out what to do here
+    }
+
+    fn blend_mode(&self) -> Option<BlendMode> {
+        // TODO: figure out what to do here
+        None
+    }
+}
+
 #[allow(dead_code)]
-#[allow(non_snake_case)]
 fn hsv_to_rgb(hsv: (f64, f64, f64)) -> (u8, u8, u8) {
     let (H, S, V) = hsv;
 
