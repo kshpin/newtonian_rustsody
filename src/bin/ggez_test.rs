@@ -1,6 +1,6 @@
 use ggez::{Context, ContextBuilder, GameResult};
 use ggez::event::{self, EventHandler};
-use ggez::graphics::{self, Drawable, DrawParam, Rect, BlendMode};
+use ggez::graphics::{self};
 
 fn main() {
     let (mut ctx, event_loop) = ContextBuilder::new("newtonian_rustsody", "Fire").build().expect("context and event loop");
