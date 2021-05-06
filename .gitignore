@@ -1,5 +1,7 @@
+/.vscode
+/oprofile_data
+/Cargo.lock
+/newtonian_rustsody.iml
+
 /target
-oprofile_data
-.vscode
-Cargo.lock
-newtonian_rustsody.iml
+/out

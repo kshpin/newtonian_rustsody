@@ -86,7 +86,7 @@ impl Fractal {
             format!("out/{}", filename),
             &self.pixels,
             800, 800,
-            image::ColorType::Rgb8
+            image::ColorType::Rgba8
         ).expect("saved image");
     }
 
