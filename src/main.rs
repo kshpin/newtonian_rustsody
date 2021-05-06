@@ -1,20 +1,16 @@
-extern crate sdl2;
-extern crate image;
-
-use std::time::{Duration, Instant, SystemTime};
+use std::time::{SystemTime};
 
 use gfx_core::format::{Format, SurfaceType, ChannelType};
 
 use ggez::{Context, ContextBuilder, GameResult};
-use ggez::conf::NumSamples;
+use ggez::conf::{NumSamples, WindowSetup, WindowMode};
 use ggez::event::{self, EventHandler, KeyCode, KeyMods, MouseButton};
-use ggez::graphics::{self, Drawable, DrawParam, Rect, Mesh, BlendMode, DrawMode, Canvas, Color};
+use ggez::graphics::{self, DrawParam, Rect, Mesh, DrawMode, Canvas, Color};
 use ggez::timer;
 
 mod fractals;
 use fractals::Fractal;
 use fractals::Rectangle;
-
 
 #[allow(unused_imports)]
 use num::Complex;
@@ -39,19 +35,7 @@ struct App {
 }
 
 impl App {
-    pub fn new(ctx: &mut Context, width: u32, height: u32, scroll_scale: f64) -> App {
-        /*let mut fractal = Fractal::with_coefficients(
-            (width as usize, height as usize),
-            Rect { left: -5f64, top: -5f64, right: 5f64, bottom: 5f64 },
-            vec![
-                Complex::new(-0.2796455185190574, -8.619337302126723),
-                Complex::new(7.591418031049244, 4.167755685364256),
-                Complex::new(-9.121138413779903, -6.79613957297315),
-                Complex::new(9.197246762941262, 8.190568781916397),
-                Complex::new(5.366325985514713, -1.1587722090698378),
-            ]
-        );*/
-
+    pub fn new(ctx: &mut Context, width: u32, height: u32, scroll_scale: f64, generate_immediately: bool) -> App {
         App {
             width,
             height,
@@ -60,7 +44,7 @@ impl App {
             scroll_scale,
 
             draw: true,
-            generate: true,
+            generate: generate_immediately,
 
             fractal: Fractal::with_random_coefficients(
                 ctx,
@@ -124,7 +108,7 @@ impl EventHandler for App {
         }
     }
 
-    fn mouse_button_up_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) {
+    fn mouse_button_up_event(&mut self, _ctx: &mut Context, button: MouseButton, _x: f32, _y: f32) {
         if button == MouseButton::Left {
             self.selecting = false;
             self.zoom_view = Rectangle {
@@ -235,7 +219,24 @@ fn main() {
     let width = 800;
     let height = 800;
 
-    let (mut ctx, event_loop) = ContextBuilder::new("newtonian_rustsody", "kshpin").build().expect("context and event loop");
-    let app = App::new(&mut ctx, width, height, scroll_scale);
+    let generate_immediately = if let Some(_val) = std::env::args().nth(1) {
+        true // TODO: should probably do flag analysis more properly
+    } else {
+        false
+    };
+
+    let window_setup = WindowSetup::default()
+        .title("Newtonian Rustsody");
+
+    let window_mode = WindowMode::default()
+        .dimensions(width as f32, height as f32)
+        .borderless(false);
+
+    let (mut ctx, event_loop) = ContextBuilder::new("newtonian_rustsody", "kshpin")
+        .window_setup(window_setup)
+        .window_mode(window_mode)
+        .build()
+        .expect("context and event loop");
+    let app = App::new(&mut ctx, width, height, scroll_scale, generate_immediately);
     event::run(ctx, event_loop, app);
 }

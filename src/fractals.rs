@@ -23,7 +23,7 @@ pub struct Fractal {
 
     roots: Vec<Complex<f64>>,
 
-    pixels: [u8; 800*800*3], // TODO: move away from hardcoding
+    pixels: Vec<u8>,
 }
 
 impl Fractal {
@@ -32,7 +32,7 @@ impl Fractal {
     const MAX_ITERS: u32 = 100;
 
     #[allow(dead_code)]
-    pub fn with_random_coefficients(ctx: &mut Context, size: (usize, usize), view: Rectangle<f64>, degree: u32) -> Fractal {
+    pub fn with_random_coefficients(_ctx: &mut Context, size: (usize, usize), view: Rectangle<f64>, degree: u32) -> Fractal {
         let mut coefficients = Vec::with_capacity((degree+1) as usize);
 
         let mut rng = rand::thread_rng();
@@ -48,18 +48,18 @@ impl Fractal {
             view,
             coefficients,
             roots: Vec::new(),
-            pixels: [0u8; 800*800*3] // TODO: move away from hardcoding
+            pixels: vec![0u8; size.0*size.1*4],
         }
     }
 
     #[allow(dead_code)]
-    pub fn with_coefficients(ctx: &mut Context, size: (usize, usize), view: Rectangle<f64>, coefficients: Vec<Complex<f64>>) -> Fractal {
+    pub fn with_coefficients(_ctx: &mut Context, size: (usize, usize), view: Rectangle<f64>, coefficients: Vec<Complex<f64>>) -> Fractal {
         Fractal {
             size,
             view,
             coefficients,
             roots: Vec::new(),
-            pixels: [0u8; 800*800*3] // TODO: move away from hardcoding
+            pixels: vec![0u8; size.0*size.1*4],
         }
     }
 
@@ -197,7 +197,9 @@ impl Fractal {
                 }
             }
 
-            pixel_index += 3;
+            self.pixels[pixel_index + 3] = 1; // alpha
+
+            pixel_index += 4;
         }
 
         println!("texture: {}", Instant::now().duration_since(beginning).as_micros());
@@ -210,11 +212,11 @@ impl Drawable for Fractal {
         graphics::draw(ctx, &image, param)
     }
 
-    fn dimensions(&self, ctx: &mut Context) -> Option<Rect> {
+    fn dimensions(&self, _ctx: &mut Context) -> Option<Rect> {
         Some(Rect::new(0f32, 0f32, self.size.0 as f32, self.size.1 as f32))
     }
 
-    fn set_blend_mode(&mut self, mode: Option<BlendMode>) {
+    fn set_blend_mode(&mut self, _mode: Option<BlendMode>) {
         // TODO: figure out what to do here
     }
 
@@ -225,6 +227,7 @@ impl Drawable for Fractal {
 }
 
 #[allow(dead_code)]
+#[allow(non_snake_case)]
 fn hsv_to_rgb(hsv: (f64, f64, f64)) -> (u8, u8, u8) {
     let (H, S, V) = hsv;
 
